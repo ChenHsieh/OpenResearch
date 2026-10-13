@@ -2116,6 +2116,7 @@ struct CreateRunReq {
     backend: Option<String>,
     cpus: Option<u32>,
     mem: Option<String>,
+    partition: Option<String>,
     flavor: Option<String>,
     host: Option<String>,
     container: Option<String>,
@@ -2148,6 +2149,7 @@ impl CreateRunReq {
             backend: args.backend.clone(),
             cpus: args.cpus,
             mem: args.mem.clone(),
+            partition: args.partition.clone(),
             flavor: args.flavor.clone(),
             host: args.host.clone(),
             container: args.container.clone(),
@@ -2186,6 +2188,7 @@ impl CreateRunReq {
             timeout: self.timeout,
             cpus: self.cpus,
             mem: self.mem,
+            partition: self.partition,
             force: self.force,
             chat_session_id: self.chat_session_id,
             agent_origin: self.agent_origin,
@@ -9071,6 +9074,7 @@ mod tests {
             timeout: None,
             cpus: Some(8),
             mem: Some("64G".into()),
+            partition: Some("gpu".into()),
             force: true,
             chat_session_id: Some("session-1".into()),
             agent_origin: None,
@@ -9082,6 +9086,7 @@ mod tests {
         assert_eq!(value["experimentId"], "experiment-1");
         assert_eq!(value["cpus"], 8);
         assert_eq!(value["mem"], "64G");
+        assert_eq!(value["partition"], "gpu");
         assert_eq!(value["chatSessionId"], "session-1");
         assert_eq!(value["force"], true);
         let forwarded = serde_json::from_value::<CreateRunReq>(value)
@@ -9089,6 +9094,7 @@ mod tests {
             .into_run_args();
         assert_eq!(forwarded.cpus, Some(8));
         assert_eq!(forwarded.mem.as_deref(), Some("64G"));
+        assert_eq!(forwarded.partition.as_deref(), Some("gpu"));
         assert_eq!(forwarded.chat_session_id.as_deref(), Some("session-1"));
         assert!(forwarded.force);
     }
