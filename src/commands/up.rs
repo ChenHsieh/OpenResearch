@@ -2206,6 +2206,7 @@ pub(crate) struct RunLaunchSummary {
     pub run_id: String,
     pub experiment_id: String,
     pub job_id: Option<String>,
+    pub slurm_partition: Option<String>,
     pub slurm_resources: Option<String>,
 }
 
@@ -2277,16 +2278,16 @@ pub(crate) async fn submit_run_via_up(
         .and_then(|backend| backend.get("jobId"))
         .and_then(Value::as_str)
         .map(str::to_string);
-    let slurm_resources = response
+    let backend: Option<crate::jobs::BackendDescriptor> = response
         .run
         .backend
-        .and_then(|backend| serde_json::from_value(backend).ok())
-        .and_then(|backend| local::slurm::requested_resources(&backend));
+        .and_then(|backend| serde_json::from_value(backend).ok());
     Ok(RunLaunchSummary {
         run_id: response.run.id,
         experiment_id: args.exp_id.clone(),
         job_id,
-        slurm_resources,
+        slurm_partition: backend.as_ref().and_then(local::slurm::requested_partition),
+        slurm_resources: backend.as_ref().and_then(local::slurm::requested_resources),
     })
 }
 

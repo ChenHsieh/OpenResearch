@@ -318,6 +318,10 @@ mod tests {
         d.partition = Some("gpu_p".to_string());
         let json = d.to_json();
         assert!(json.contains("\"partition\":\"gpu_p\""), "{json}");
+        assert_eq!(
+            crate::local::slurm::requested_partition(&d).as_deref(),
+            Some("partition gpu_p")
+        );
         assert!(json.contains("\"sshHost\":\"203.0.113.7\""), "{json}");
         assert!(json.contains("\"cpusPerTask\":8"), "{json}");
 
@@ -354,6 +358,7 @@ mod tests {
         assert_eq!(d.timeout_secs, None);
         assert_eq!(d.cpus_per_task, None);
         assert_eq!(d.partition, None);
+        assert_eq!(crate::local::slurm::requested_partition(&d), None);
         // A Slurm run from before cpus/mem were recorded may still have requested them.
         let slurm =
             BackendDescriptor::parse(r#"{"kind":"slurm_job","namespace":"login","jobId":"123"}"#)

@@ -23,8 +23,8 @@ pub async fn launch_local_slurm(args: &crate::ExpRunArgs) -> Result<()> {
         backend.namespace.as_deref().unwrap_or(""),
         backend.job_id.as_deref().unwrap_or("")
     );
-    if let Some(partition) = backend.partition.as_deref() {
-        println!("  partition {partition}");
+    if let Some(partition) = requested_partition(&backend) {
+        println!("  {partition}");
     }
     if let Some(resources) = requested_resources(&backend) {
         println!("  {resources}");
@@ -35,6 +35,15 @@ pub async fn launch_local_slurm(args: &crate::ExpRunArgs) -> Result<()> {
         crate::invocation::follow_up(&run.experiment_id, &run.id)
     );
     Ok(())
+}
+
+/// The launch-summary line for a Slurm job that named a partition, per run or
+/// from the saved default.
+pub fn requested_partition(backend: &BackendDescriptor) -> Option<String> {
+    backend
+        .partition
+        .as_deref()
+        .map(|partition| format!("partition {partition}"))
 }
 
 /// The launch-summary line for a Slurm job that asked for cores or memory.
